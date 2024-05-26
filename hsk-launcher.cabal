@@ -1,0 +1,80 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.36.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           hsk-launcher
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/hsk-launcher#readme>
+homepage:       https://github.com/githubuser/hsk-launcher#readme
+bug-reports:    https://github.com/githubuser/hsk-launcher/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2024 Author name here
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/hsk-launcher
+
+library
+  exposed-modules:
+      Lib
+      Xdg
+  other-modules:
+      Paths_hsk_launcher
+  autogen-modules:
+      Paths_hsk_launcher
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      X11
+    , base >=4.7 && <5
+    , directory
+    , split
+    , text
+  default-language: Haskell2010
+
+executable hsk-launcher-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_hsk_launcher
+  autogen-modules:
+      Paths_hsk_launcher
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      X11
+    , base >=4.7 && <5
+    , directory
+    , hsk-launcher
+    , split
+    , text
+  default-language: Haskell2010
+
+test-suite hsk-launcher-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_hsk_launcher
+  autogen-modules:
+      Paths_hsk_launcher
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      X11
+    , base >=4.7 && <5
+    , directory
+    , hsk-launcher
+    , split
+    , text
+  default-language: Haskell2010
