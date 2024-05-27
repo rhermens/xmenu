@@ -1,12 +1,12 @@
 module Main (main) where
 
 import Xdg
+import Config
 import qualified Graphics.X11.Xlib as X
 import qualified Graphics.X11.Xlib.Extras as X
 import Data.Bits
 import Graphics.X11 (KeySym)
 import Control.Exception (handle, IOException)
-import qualified Data.Word as Word
 import Data.Text (pack, toLower, isInfixOf)
 
 data WindowState = WindowState {
@@ -20,13 +20,6 @@ filterEntries xe s = filter (\e -> toLower (pack s) `isInfixOf` toLower (pack (n
 handleExc :: IOException -> IO ()
 handleExc = print
 
-background :: X.Pixel
-background = 100
-foreground :: X.Pixel
-foreground = 150
-wHeight :: Word.Word32
-wHeight = 200
-
 main :: IO ()
 main = handle handleExc $ do
     display <- X.openDisplay ""
@@ -34,9 +27,9 @@ main = handle handleExc $ do
     rw <- X.rootWindow display (X.screenNumberOfScreen screen)
 
     window <- X.allocaSetWindowAttributes $ \wa -> do
-        _ <- X.set_override_redirect wa True
-        _ <- X.set_background_pixel wa 0
-        X.createWindow display rw 0 0 (X.widthOfScreen screen) wHeight
+        X.set_override_redirect wa True
+        X.set_background_pixel wa 0
+        X.createWindow display rw 0 0 (X.widthOfScreen screen) height
             X.copyFromParent X.copyFromParent
             X.inputOutput
             (X.defaultVisualOfScreen screen)
@@ -44,11 +37,11 @@ main = handle handleExc $ do
             wa
 
     gc <- X.createGC display window
-    font <- X.loadQueryFont display "-misc-fixed-*-*-*-*-13-*-*-*-*-*-*-*"
+    font <- X.loadQueryFont display fontFace
     X.selectInput display window (X.exposureMask .|. X.keyPressMask .|. X.visibilityChangeMask)
 
     X.mapWindow display window
-    _ <- X.setInputFocus display window X.revertToParent X.currentTime
+    X.setInputFocus display window X.revertToParent X.currentTime
     xdgEntries <- scanEntries
 
     let state = WindowState {search="", entries=xdgEntries}
@@ -91,13 +84,14 @@ draw :: X.Display -> X.Screen -> X.Window -> X.GC -> WindowState -> IO ()
 draw display screen window gc state = do
     X.setBackground display gc background
     X.setForeground display gc foreground
-    X.fillRectangle display window gc 0 0 (X.widthOfScreen screen) wHeight
-    X.drawImageString display window gc 200 50 (search state)
-    let xe = filterEntries (entries state) (search state)
-    print xe
-    mapM_ (\fe -> do
+    X.fillRectangle display window gc 0 0 (X.widthOfScreen screen) height
+    X.drawImageString display window gc 200 fontSize (search state)
+    drawList display screen window gc (take 5 (filterEntries (entries state) (search state)))
+
+drawList :: X.Display -> X.Screen -> X.Window -> X.GC -> [DesktopEntry] -> IO ()
+drawList display _ window gc xe = do
+    mapM_ (\(i, fe) -> do
         print (name fe)
-        X.drawImageString display window gc 200 60 (name fe)
-        return ()
-        ) xe
+        X.drawImageString display window gc 200 (fontSize + (i * fontSize)) (name fe)
+        ) (zip [1..] xe)
 

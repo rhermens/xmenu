@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Config
       Xdg
   other-modules:
       Paths_hsk_launcher
