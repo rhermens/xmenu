@@ -17,6 +17,8 @@ handleExc = print
 main :: IO ()
 main = handle handleExc $ do
     display <- X.openDisplay ""
+    xdgEntries <- scanEntries
+    let state = WindowState { search="", entries=xdgEntries, exitWith=Nothing }
     let screen = X.defaultScreenOfDisplay display
     rw <- X.rootWindow display (X.screenNumberOfScreen screen)
 
@@ -36,23 +38,20 @@ main = handle handleExc $ do
 
     X.mapWindow display window
     X.setInputFocus display window X.revertToParent X.currentTime
-    xdgEntries <- scanEntries
-
-    let state = WindowState {search="", entries=xdgEntries, exitWith=Nothing}
-    loop display screen window gc state
+    loop display screen window gc font state
 
     X.freeGC display gc
     X.freeFont display font
 
-loop :: X.Display -> X.Screen -> X.Window -> X.GC -> WindowState -> IO ()
-loop display screen window gc state = do
+loop :: X.Display -> X.Screen -> X.Window -> X.GC -> X.FontStruct -> WindowState -> IO ()
+loop display screen window gc font state =
     X.allocaXEvent $ \e -> do
         X.nextEvent display e
         next <- handleEvent state e
-        draw display screen window gc next
+        draw display screen window gc font next
         case exitWith next of
             Just ec -> ec
-            Nothing -> loop display screen window gc next
+            Nothing -> loop display screen window gc font next
 
 handleEvent :: WindowState -> X.XEventPtr -> IO WindowState
 handleEvent s e = do
@@ -60,11 +59,8 @@ handleEvent s e = do
     case typ of
         _ | typ == X.keyPress -> do
             buf <- X.lookupString (X.asKeyEvent e)
-            print buf
-            print (search s)
             return $ handleKey s buf
         _ -> do
-            print "other"
             return s
 
 handleKey :: WindowState -> (Maybe KeySym, String) -> WindowState

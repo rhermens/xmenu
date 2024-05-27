@@ -11,7 +11,7 @@ foreground :: X.Pixel
 foreground = 150
 
 height :: Word32
-height = 200
+height = fromIntegral fontSize * 2
 
 fontSize :: Int32
 fontSize = 13

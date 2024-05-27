@@ -25,15 +25,15 @@ scanEntries = do
 
 fromFileContent :: String -> Maybe DesktopEntry
 fromFileContent s = do
-    let lns = filter (\l -> not ("#" `isPrefixOf` l && null l)) (lines s)
-        cfg = mapMaybe (\l -> case splitOn "=" l of
-            [k, v] -> Just (k, v)
-            _ -> Nothing
-            ) lns
-
     case (lookup "Name" cfg, lookup "Exec" cfg) of
         (Just n, Just e) -> Just DesktopEntry {name=n, exec=substituteExecVars e}
         _ -> Nothing
+    where
+        lns = filter (\l -> not ("#" `isPrefixOf` l && null l)) (lines s)
+        cfg = mapMaybe (\l -> case splitOn "=" l of
+                [k, v] -> Just (k, v)
+                _ -> Nothing
+                ) lns
 
 substituteExecVars :: String -> String
 substituteExecVars s =
