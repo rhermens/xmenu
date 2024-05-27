@@ -23,39 +23,22 @@ source-repository head
   type: git
   location: https://github.com/githubuser/hsk-launcher
 
-library
-  exposed-modules:
+executable hsk-launcher-exe
+  main-is: Main.hs
+  other-modules:
       Config
       Xdg
-  other-modules:
       Paths_hsk_launcher
   autogen-modules:
       Paths_hsk_launcher
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      X11
-    , base >=4.7 && <5
-    , directory
-    , split
-    , text
-  default-language: Haskell2010
-
-executable hsk-launcher-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_hsk_launcher
-  autogen-modules:
-      Paths_hsk_launcher
-  hs-source-dirs:
-      app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       X11
     , base >=4.7 && <5
     , directory
-    , hsk-launcher
+    , process
     , split
     , text
   default-language: Haskell2010
@@ -75,6 +58,7 @@ test-suite hsk-launcher-test
     , base >=4.7 && <5
     , directory
     , hsk-launcher
+    , process
     , split
     , text
   default-language: Haskell2010

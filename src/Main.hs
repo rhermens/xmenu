@@ -8,11 +8,14 @@ import Data.Bits
 import Graphics.X11 (KeySym)
 import Control.Exception (handle, IOException)
 import Data.Text (pack, toLower, isInfixOf)
+import System.Exit (exitSuccess)
+import System.Process (spawnProcess)
 
 data WindowState = WindowState {
     entries :: [DesktopEntry],
-    search :: String
-} deriving (Show)
+    search :: String,
+    exitWith :: Maybe (IO ())
+}
 
 filterEntries :: [DesktopEntry] -> String -> [DesktopEntry]
 filterEntries xe s = filter (\e -> toLower (pack s) `isInfixOf` toLower (pack (name e))) xe
@@ -44,7 +47,7 @@ main = handle handleExc $ do
     X.setInputFocus display window X.revertToParent X.currentTime
     xdgEntries <- scanEntries
 
-    let state = WindowState {search="", entries=xdgEntries}
+    let state = WindowState {search="", entries=xdgEntries, exitWith=Nothing}
     loop display screen window gc state
 
     X.freeGC display gc
@@ -57,7 +60,9 @@ loop display screen window gc state = do
         next <- handleEvent state e
         draw display screen window gc next
         X.flush display
-        loop display screen window gc next
+        case exitWith next of
+            Just ec -> ec
+            Nothing -> loop display screen window gc next
 
 handleEvent :: WindowState -> X.XEventPtr -> IO WindowState
 handleEvent s e = do
@@ -74,11 +79,20 @@ handleEvent s e = do
 
 handleKey :: WindowState -> (Maybe KeySym, String) -> WindowState
 handleKey s (Just sym, ks)
-    | sym == X.xK_BackSpace = s {search = init $ search s}
-    | sym >= X.xK_space && sym <= X.xK_ydiaeresis = s {search = search s ++ ks}
+    | sym == X.xK_BackSpace =
+        if null (search s)
+        then s { exitWith = Just exitSuccess }
+        else s { search = init $ search s }
+    | sym >= X.xK_space && sym <= X.xK_ydiaeresis = s { search = search s ++ ks }
+    | sym == X.xK_Escape = s { exitWith = Just exitSuccess }
+    | sym == X.xK_KP_Enter || sym == X.xK_Return = s { exitWith = Just $ launch $ exec $ head $ filterEntries (entries s) (search s) }
     | otherwise = s
-
 handleKey s (Nothing, _) = s
+
+launch :: String -> IO ()
+launch c = do
+    _ <- spawnProcess c []
+    return ()
 
 draw :: X.Display -> X.Screen -> X.Window -> X.GC -> WindowState -> IO ()
 draw display screen window gc state = do
@@ -86,12 +100,10 @@ draw display screen window gc state = do
     X.setForeground display gc foreground
     X.fillRectangle display window gc 0 0 (X.widthOfScreen screen) height
     X.drawImageString display window gc 200 fontSize (search state)
-    drawList display screen window gc (take 5 (filterEntries (entries state) (search state)))
+    drawList display screen window gc $ take 5 $ filterEntries (entries state) (search state)
 
 drawList :: X.Display -> X.Screen -> X.Window -> X.GC -> [DesktopEntry] -> IO ()
-drawList display _ window gc xe = do
-    mapM_ (\(i, fe) -> do
-        print (name fe)
-        X.drawImageString display window gc 200 (fontSize + (i * fontSize)) (name fe)
-        ) (zip [1..] xe)
+drawList display _ window gc xe = mapM_ (\(i, fe) -> do
+    X.drawImageString display window gc 200 (fontSize + (i * fontSize)) (name fe)
+    ) (zip [1..] xe)
 
