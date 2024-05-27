@@ -27,6 +27,8 @@ executable hsk-launcher-exe
   main-is: Main.hs
   other-modules:
       Config
+      Draw
+      State
       Xdg
       Paths_hsk_launcher
   autogen-modules:

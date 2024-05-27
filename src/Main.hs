@@ -2,23 +2,14 @@ module Main (main) where
 
 import Xdg
 import Config
+import Draw
+import State
 import qualified Graphics.X11.Xlib as X
 import qualified Graphics.X11.Xlib.Extras as X
 import Data.Bits
 import Graphics.X11 (KeySym)
 import Control.Exception (handle, IOException)
-import Data.Text (pack, toLower, isInfixOf)
 import System.Exit (exitSuccess)
-import System.Process (spawnProcess)
-
-data WindowState = WindowState {
-    entries :: [DesktopEntry],
-    search :: String,
-    exitWith :: Maybe (IO ())
-}
-
-filterEntries :: [DesktopEntry] -> String -> [DesktopEntry]
-filterEntries xe s = filter (\e -> toLower (pack s) `isInfixOf` toLower (pack (name e))) xe
 
 handleExc :: IOException -> IO ()
 handleExc = print
@@ -59,7 +50,6 @@ loop display screen window gc state = do
         X.nextEvent display e
         next <- handleEvent state e
         draw display screen window gc next
-        X.flush display
         case exitWith next of
             Just ec -> ec
             Nothing -> loop display screen window gc next
@@ -85,25 +75,7 @@ handleKey s (Just sym, ks)
         else s { search = init $ search s }
     | sym >= X.xK_space && sym <= X.xK_ydiaeresis = s { search = search s ++ ks }
     | sym == X.xK_Escape = s { exitWith = Just exitSuccess }
-    | sym == X.xK_KP_Enter || sym == X.xK_Return = s { exitWith = Just $ launch $ exec $ head $ filterEntries (entries s) (search s) }
+    | sym == X.xK_KP_Enter || sym == X.xK_Return = s { exitWith = Just $ launchFirst s }
     | otherwise = s
 handleKey s (Nothing, _) = s
-
-launch :: String -> IO ()
-launch c = do
-    _ <- spawnProcess c []
-    return ()
-
-draw :: X.Display -> X.Screen -> X.Window -> X.GC -> WindowState -> IO ()
-draw display screen window gc state = do
-    X.setBackground display gc background
-    X.setForeground display gc foreground
-    X.fillRectangle display window gc 0 0 (X.widthOfScreen screen) height
-    X.drawImageString display window gc 200 fontSize (search state)
-    drawList display screen window gc $ take 5 $ filterEntries (entries state) (search state)
-
-drawList :: X.Display -> X.Screen -> X.Window -> X.GC -> [DesktopEntry] -> IO ()
-drawList display _ window gc xe = mapM_ (\(i, fe) -> do
-    X.drawImageString display window gc 200 (fontSize + (i * fontSize)) (name fe)
-    ) (zip [1..] xe)
 
