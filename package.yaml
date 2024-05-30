@@ -1,4 +1,4 @@
-name:                hsk-launcher
+name:                xmenu
 version:             0.1.0.0
 
 extra-source-files:
@@ -25,7 +25,7 @@ ghc-options:
 - -Wredundant-constraints
 
 executables:
-  hsk-launcher-exe:
+  xmenu-exe:
     main:                Main.hs
     source-dirs:         src
     ghc-options:
@@ -34,7 +34,7 @@ executables:
     - -with-rtsopts=-N
 
 tests:
-  hsk-launcher-test:
+  xmenu-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -42,4 +42,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - hsk-launcher
+    - xmenu

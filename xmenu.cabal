@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           hsk-launcher
+name:           xmenu
 version:        0.1.0.0
 license:        MIT
 license-file:   LICENSE
@@ -13,14 +13,14 @@ extra-source-files:
     README.md
     CHANGELOG.md
 
-executable hsk-launcher-exe
+executable xmenu-exe
   main-is: Main.hs
   other-modules:
       Config
       Draw
       State
       Xdg
-      Paths_hsk_launcher
+      Paths_xmenu
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -33,11 +33,11 @@ executable hsk-launcher-exe
     , text
   default-language: Haskell2010
 
-test-suite hsk-launcher-test
+test-suite xmenu-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_hsk_launcher
+      Paths_xmenu
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -45,8 +45,8 @@ test-suite hsk-launcher-test
       X11
     , base >=4.7 && <5
     , directory
-    , hsk-launcher
     , process
     , split
     , text
+    , xmenu
   default-language: Haskell2010
