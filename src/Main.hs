@@ -1,31 +1,29 @@
 module Main (main) where
 
 import Xdg
-import Config
 import Draw
 import State
+import Config
 import qualified Graphics.X11.Xlib as X
 import qualified Graphics.X11.Xlib.Extras as X
 import Data.Bits
 import Graphics.X11 (KeySym)
-import Control.Exception (handle, IOException)
 import System.Exit (exitSuccess)
-
-handleExc :: IOException -> IO ()
-handleExc = print
+import System.Directory.Internal.Prelude (getArgs)
 
 main :: IO ()
-main = handle handleExc $ do
+main = do
+    args <- parse <$> getArgs
     display <- X.openDisplay ""
     xdgEntries <- scanEntries
     let state = WindowState { search="", entries=xdgEntries, exitWith=Nothing }
     let screen = X.defaultScreenOfDisplay display
-    rw <- X.rootWindow display (X.screenNumberOfScreen screen)
 
     window <- X.allocaSetWindowAttributes $ \wa -> do
+        rw <- X.rootWindow display 0
         X.set_override_redirect wa True
         X.set_background_pixel wa 0
-        X.createWindow display rw 0 0 (X.widthOfScreen screen) height
+        X.createWindow display rw 0 0 (fromIntegral (X.displayWidth display (X.screenNumberOfScreen screen))) height
             X.copyFromParent X.copyFromParent
             X.inputOutput
             (X.defaultVisualOfScreen screen)
@@ -38,20 +36,20 @@ main = handle handleExc $ do
 
     X.mapWindow display window
     X.setInputFocus display window X.revertToParent X.currentTime
-    loop display screen window gc font state
+    loop display screen window gc font args state
 
     X.freeGC display gc
     X.freeFont display font
 
-loop :: X.Display -> X.Screen -> X.Window -> X.GC -> X.FontStruct -> WindowState -> IO ()
-loop display screen window gc font state =
+loop :: X.Display -> X.Screen -> X.Window -> X.GC -> X.FontStruct -> Args -> WindowState -> IO ()
+loop display screen window gc font args state =
     X.allocaXEvent $ \e -> do
         X.nextEvent display e
         next <- handleEvent state e
-        draw display screen window gc font next
+        draw display screen window gc font args next
         case exitWith next of
             Just ec -> ec
-            Nothing -> loop display screen window gc font next
+            Nothing -> loop display screen window gc font args next
 
 handleEvent :: WindowState -> X.XEventPtr -> IO WindowState
 handleEvent s e = do

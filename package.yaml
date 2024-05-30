@@ -1,16 +1,9 @@
 name:                hsk-launcher
 version:             0.1.0.0
-github:              "githubuser/hsk-launcher"
-license:             BSD-3-Clause
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2024 Author name here"
 
 extra-source-files:
 - README.md
 - CHANGELOG.md
-
-description:         Please see the README on GitHub at <https://github.com/githubuser/hsk-launcher#readme>
 
 dependencies:
 - base >= 4.7 && < 5

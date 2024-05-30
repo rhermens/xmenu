@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 1.12
 
 -- This file has been generated from package.yaml by hpack version 0.36.0.
 --
@@ -6,22 +6,12 @@ cabal-version: 2.2
 
 name:           hsk-launcher
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/hsk-launcher#readme>
-homepage:       https://github.com/githubuser/hsk-launcher#readme
-bug-reports:    https://github.com/githubuser/hsk-launcher/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2024 Author name here
-license:        BSD-3-Clause
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
     CHANGELOG.md
-
-source-repository head
-  type: git
-  location: https://github.com/githubuser/hsk-launcher
 
 executable hsk-launcher-exe
   main-is: Main.hs
@@ -30,8 +20,6 @@ executable hsk-launcher-exe
       Draw
       State
       Xdg
-      Paths_hsk_launcher
-  autogen-modules:
       Paths_hsk_launcher
   hs-source-dirs:
       src
@@ -49,8 +37,6 @@ test-suite hsk-launcher-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_hsk_launcher
-  autogen-modules:
       Paths_hsk_launcher
   hs-source-dirs:
       test
